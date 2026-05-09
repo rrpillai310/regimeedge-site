@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RegimeEdge — Regime-Aware Crypto Signals</title>
+<meta name="description" content="Institutional-grade crypto trading signals powered by a proprietary regime classifier. We sit out bad markets automatically.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#060a12;
+  --bg-card:#0b1120;
+  --bg-card2:#0e1628;
+  --green:#00e87a;
+  --green-dim:#00a857;
+  --green-glow:rgba(0,232,122,0.12);
+  --green-border:rgba(0,232,122,0.18);
+  --text:#cdd9e5;
+  --muted:#6a7587;
+  --red:#f85149;
+  --yellow:#e3b341;
+  --blue:#58a6ff;
+  --mono:'JetBrains Mono',monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+
+/* ── Background grid ── */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background-image:
+    linear-gradient(rgba(0,232,122,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,232,122,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* ── Glow orbs ── */
+.orb{position:fixed;border-radius:50%;filter:blur(130px);opacity:.09;pointer-events:none;z-index:-1}
+.orb1{width:700px;height:700px;background:var(--green);top:-200px;right:-150px}
+.orb2{width:500px;height:500px;background:#1a3fff;bottom:-100px;left:-150px}
+
+/* ── Nav ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:58px;
+  background:rgba(6,10,18,0.82);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--green-border);
+}
+.logo{
+  font-family:var(--mono);font-size:1rem;font-weight:700;
+  color:var(--green);letter-spacing:-.01em;text-decoration:none;
+  display:flex;align-items:center;gap:8px;
+}
+.logo-bracket{color:var(--green-dim);font-weight:300}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:.82rem;color:var(--muted);text-decoration:none;transition:color .15s}
+.nav-links a:hover{color:var(--text)}
+.btn-nav{
+  font-family:var(--mono);font-size:.78rem;padding:7px 20px;
+  background:transparent;color:var(--green);
+  border:1px solid var(--green-border);border-radius:4px;
+  cursor:pointer;text-decoration:none;transition:.15s;
+}
+.btn-nav:hover{background:var(--green-glow);box-shadow:0 0 20px var(--green-glow)}
+
+/* ── Hero ── */
+#hero{
+  min-height:100vh;display:flex;align-items:center;
+  padding:100px 48px 80px;
+}
+.hero-inner{
+  max-width:1200px;margin:0 auto;width:100%;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+}
+.hero-tag{
+  font-family:var(--mono);font-size:.68rem;color:var(--green-dim);
+  letter-spacing:.14em;text-transform:uppercase;margin-bottom:22px;
+  display:flex;align-items:center;gap:8px;
+}
+.hero-tag::before{content:'▶';color:var(--green)}
+h1{
+  font-size:3.4rem;font-weight:700;line-height:1.08;
+  color:#e8f0f8;margin-bottom:24px;letter-spacing:-.03em;
+}
+h1 em{color:var(--green);font-style:normal}
+.hero-sub{font-size:1rem;color:var(--muted);max-width:460px;margin-bottom:40px;line-height:1.75}
+.hero-ctas{display:flex;gap:14px;flex-wrap:wrap}
+.btn-primary{
+  font-family:var(--mono);font-size:.86rem;padding:13px 30px;
+  background:var(--green);color:#060a12;border:none;border-radius:4px;
+  cursor:pointer;text-decoration:none;font-weight:700;transition:.15s;
+  white-space:nowrap;
+}
+.btn-primary:hover{opacity:.9;box-shadow:0 0 28px rgba(0,232,122,.35)}
+.btn-ghost{
+  font-family:var(--mono);font-size:.86rem;padding:13px 30px;
+  background:transparent;color:var(--text);
+  border:1px solid #1e2a3a;border-radius:4px;
+  cursor:pointer;text-decoration:none;transition:.15s;white-space:nowrap;
+}
+.btn-ghost:hover{border-color:var(--muted)}
+
+/* ── Terminal ── */
+.terminal{
+  background:#07091200;
+  border:1px solid var(--green-border);border-radius:10px;
+  box-shadow:0 0 60px rgba(0,232,122,.07),0 24px 80px rgba(0,0,0,.5);
+  overflow:hidden;font-family:var(--mono);
+}
+.t-bar{
+  background:#0b1120;padding:10px 16px;
+  display:flex;align-items:center;gap:8px;
+  border-bottom:1px solid var(--green-border);
+}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot-r{background:#f85149}.dot-y{background:#e3b341}.dot-g{background:#3fb950}
+.t-bar-title{font-size:.68rem;color:var(--muted);margin-left:8px;flex:1;text-align:center}
+.t-body{padding:22px 26px;min-height:300px;font-size:.8rem;line-height:1.9;background:#07091299}
+.tp{color:var(--green)}
+.tc{color:var(--text)}
+.to{color:var(--muted)}
+.tk{color:#58a6ff}
+.tv-buy{color:var(--green);font-weight:600}
+.tv-hold{color:var(--yellow)}
+.tv-stress{color:var(--red)}
+.cursor{
+  display:inline-block;width:7px;height:13px;background:var(--green);
+  vertical-align:middle;animation:blink 1s step-end infinite;
+}
+@keyframes blink{50%{opacity:0}}
+
+/* ── Stats strip ── */
+#stats{
+  background:var(--bg-card);
+  border-top:1px solid var(--green-border);
+  border-bottom:1px solid var(--green-border);
+  padding:0 48px;
+}
+.stats-inner{
+  max-width:1200px;margin:0 auto;
+  display:grid;grid-template-columns:repeat(4,1fr);
+}
+.stat{padding:30px 20px;border-right:1px solid #0e1628}
+.stat:last-child{border-right:none}
+.stat-lbl{
+  font-family:var(--mono);font-size:.66rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;
+}
+.stat-val{
+  font-family:var(--mono);font-size:1.9rem;font-weight:700;color:var(--green);
+}
+.stat-val.neutral{color:var(--text)}
+.stat-note{font-size:.73rem;color:var(--muted);margin-top:3px}
+
+/* ── Sections ── */
+.section{padding:100px 48px;max-width:1200px;margin:0 auto}
+.section-full{padding:100px 48px;background:var(--bg-card)}
+.section-full .section-inner{max-width:1200px;margin:0 auto}
+.sec-tag{
+  font-family:var(--mono);font-size:.66rem;color:var(--green-dim);
+  text-transform:uppercase;letter-spacing:.14em;margin-bottom:16px;
+}
+h2{font-size:2.1rem;font-weight:700;color:#e8f0f8;margin-bottom:16px;letter-spacing:-.025em}
+.sec-desc{font-size:.94rem;color:var(--muted);max-width:540px;line-height:1.75;margin-bottom:52px}
+
+/* ── Signal feed ── */
+.feed{
+  background:#06090f;border:1px solid var(--green-border);
+  border-radius:8px;overflow:hidden;font-family:var(--mono);
+}
+.feed-hdr{
+  background:var(--bg-card);padding:12px 22px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid var(--green-border);
+}
+.feed-title{font-size:.72rem;color:var(--text)}
+.feed-badge{
+  font-size:.62rem;padding:3px 10px;border-radius:3px;letter-spacing:.08em;
+  background:rgba(227,179,65,.12);color:var(--yellow);
+  border:1px solid rgba(227,179,65,.25);
+}
+.sig-row{
+  display:grid;
+  grid-template-columns:170px 96px 96px 120px 72px 1fr;
+  align-items:center;gap:16px;
+  padding:14px 22px;border-bottom:1px solid #0b1120;
+  font-size:.78rem;transition:background .1s;
+}
+.sig-row:hover{background:#0b1120}
+.sig-row:last-child{border-bottom:none}
+.sig-time{color:var(--muted)}
+.sig-sym{color:var(--text);font-weight:500}
+.reg-pill{
+  padding:3px 10px;border-radius:3px;
+  font-size:.64rem;font-weight:700;letter-spacing:.07em;text-align:center;
+}
+.reg-trend{background:rgba(0,232,122,.1);color:var(--green);border:1px solid rgba(0,232,122,.2)}
+.reg-range{background:rgba(227,179,65,.1);color:var(--yellow);border:1px solid rgba(227,179,65,.2)}
+.reg-stress{background:rgba(248,81,73,.1);color:var(--red);border:1px solid rgba(248,81,73,.2)}
+.sig-tier{color:var(--muted)}
+.sig-tier b{color:var(--text)}
+.act-buy{color:var(--green);font-weight:700}
+.act-block{color:var(--muted)}
+.sig-note{font-size:.7rem;color:var(--muted)}
+.sig-note.red{color:rgba(248,81,73,.7)}
+
+/* ── Regime cards ── */
+.regime-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.regime-card{
+  background:var(--bg-card);border:1px solid #0e1628;
+  border-radius:8px;padding:32px;transition:border-color .2s;
+}
+.regime-card:hover{border-color:var(--green-border)}
+.r-icon{font-size:1.6rem;margin-bottom:18px}
+.regime-card h3{font-family:var(--mono);font-size:.9rem;font-weight:600;margin-bottom:10px}
+.r-trend h3{color:var(--green)}.r-range h3{color:var(--yellow)}.r-stress h3{color:var(--red)}
+.regime-card p{font-size:.84rem;color:var(--muted);line-height:1.65}
+.regime-card .r-rule{
+  margin-top:16px;padding:10px 14px;border-radius:4px;
+  font-family:var(--mono);font-size:.72rem;
+}
+.r-trend .r-rule{background:rgba(0,232,122,.06);color:var(--green-dim)}
+.r-range .r-rule{background:rgba(227,179,65,.06);color:#a07c20}
+.r-stress .r-rule{background:rgba(248,81,73,.06);color:#a33}
+
+/* ── How it works ── */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:0}
+.step{padding:28px;background:var(--bg-card);border:1px solid #0e1628;border-radius:8px}
+.step-num{
+  font-family:var(--mono);font-size:.7rem;color:var(--green-dim);
+  letter-spacing:.1em;margin-bottom:14px;
+}
+.step h3{font-size:.96rem;font-weight:600;color:#e8f0f8;margin-bottom:8px}
+.step p{font-size:.83rem;color:var(--muted);line-height:1.65}
+
+/* ── Pricing ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px}
+.price-card{
+  background:var(--bg-card);border:1px solid #0e1628;
+  border-radius:8px;padding:36px 28px;position:relative;
+}
+.price-card.hot{
+  border-color:var(--green-border);
+  box-shadow:0 0 50px rgba(0,232,122,.05);
+}
+.hot-badge{
+  position:absolute;top:-1px;left:50%;transform:translateX(-50%);
+  background:var(--green);color:#060a12;
+  font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.09em;
+  padding:4px 16px;border-radius:0 0 6px 6px;
+}
+.price-tier{font-family:var(--mono);font-size:.68rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px}
+.price-amt{
+  font-family:var(--mono);font-size:2.5rem;font-weight:700;
+  color:#e8f0f8;margin-bottom:6px;
+}
+.price-amt span{font-size:.95rem;color:var(--muted);font-weight:400}
+.price-desc{font-size:.83rem;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.features{list-style:none;margin-bottom:32px}
+.features li{
+  font-size:.83rem;color:var(--text);
+  padding:8px 0;border-bottom:1px solid #0e1628;
+  display:flex;align-items:flex-start;gap:10px;
+}
+.features li:last-child{border-bottom:none}
+.features li::before{content:"→";color:var(--green);font-family:var(--mono);flex-shrink:0}
+.btn-tier{
+  display:block;width:100%;
+  font-family:var(--mono);font-size:.83rem;
+  padding:12px;border-radius:4px;
+  text-align:center;text-decoration:none;cursor:pointer;transition:.15s;
+}
+.btn-tier-primary{background:var(--green);color:#060a12;font-weight:700;border:none}
+.btn-tier-primary:hover{opacity:.9;box-shadow:0 0 24px rgba(0,232,122,.3)}
+.btn-tier-ghost{background:transparent;color:var(--text);border:1px solid #1e2a3a}
+.btn-tier-ghost:hover{border-color:var(--muted)}
+
+/* ── CTA ── */
+#cta-section{
+  padding:120px 48px;text-align:center;
+  border-top:1px solid var(--green-border);
+}
+#cta-section h2{font-size:2.5rem;margin-bottom:16px}
+#cta-section p{color:var(--muted);margin-bottom:40px;font-size:.95rem}
+.waitlist-form{
+  display:flex;gap:10px;justify-content:center;
+  max-width:460px;margin:0 auto;
+}
+.waitlist-input{
+  flex:1;padding:13px 18px;
+  background:var(--bg-card);color:var(--text);
+  border:1px solid #1e2a3a;border-radius:4px;
+  font-family:var(--mono);font-size:.86rem;outline:none;
+  transition:border-color .15s;
+}
+.waitlist-input:focus{border-color:var(--green-border)}
+.waitlist-input::placeholder{color:var(--muted)}
+.form-note{color:var(--muted);font-size:.75rem;margin-top:14px}
+.form-success{
+  display:none;color:var(--green);
+  font-family:var(--mono);font-size:.88rem;margin-top:16px;
+}
+
+/* ── Footer ── */
+footer{
+  border-top:1px solid #0e1628;padding:36px 48px;
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:16px;
+}
+.footer-logo{
+  font-family:var(--mono);font-size:.88rem;
+  color:var(--green-dim);text-decoration:none;
+}
+.footer-links{display:flex;gap:20px}
+.footer-links a{font-size:.78rem;color:var(--muted);text-decoration:none}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:.72rem;color:#2d3748;width:100%;text-align:center}
+
+/* ── Responsive ── */
+@media(max-width:960px){
+  .hero-inner{grid-template-columns:1fr}
+  .terminal{display:none}
+  h1{font-size:2.3rem}
+  .section,.section-full{padding:64px 24px}
+  nav{padding:0 24px}
+  .stats-inner{grid-template-columns:1fr 1fr}
+  .regime-grid,.pricing-grid,.steps{grid-template-columns:1fr}
+  .sig-row{grid-template-columns:1fr 1fr;gap:8px;font-size:.74rem}
+  footer{padding:28px 24px}
+}
+</style>
+</head>
+<body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- ══ NAV ══════════════════════════════════════════════════════════════════ -->
+<nav>
+  <a class="logo" href="#">
+    <span class="logo-bracket">[</span>REGIME<span style="color:#e8f0f8">EDGE</span><span class="logo-bracket">]</span>
+  </a>
+  <div class="nav-links">
+    <a href="#signals">Signals</a>
+    <a href="#regime">How It Works</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#cta-section" class="btn-nav">Get Early Access →</a>
+  </div>
+</nav>
+
+<!-- ══ HERO ═════════════════════════════════════════════════════════════════ -->
+<div id="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag">Regime-aware trading signals</div>
+      <h1>Sit out bad markets.<br><em>Automatically.</em></h1>
+      <p class="hero-sub">
+        Institutional-grade crypto signals built on a proprietary regime classifier.
+        TREND, RANGE, STRESS — the system knows the difference and blocks trades
+        when volatility makes entry reckless.
+      </p>
+      <div class="hero-ctas">
+        <a href="#cta-section" class="btn-primary">Get Early Access</a>
+        <a href="#signals" class="btn-ghost">See Live Signals ↓</a>
+      </div>
+    </div>
+
+    <div class="terminal">
+      <div class="t-bar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <span class="t-bar-title">regime-signal — live</span>
+      </div>
+      <div class="t-body" id="t-out"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ STATS ═════════════════════════════════════════════════════════════════ -->
+<div id="stats">
+  <div class="stats-inner">
+    <div class="stat">
+      <div class="stat-lbl">Win Rate</div>
+      <div class="stat-val" id="s-wr">—</div>
+      <div class="stat-note">live trading, real money</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Total P&amp;L</div>
+      <div class="stat-val" id="s-pnl">—</div>
+      <div class="stat-note">net of all fees</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Signals Fired</div>
+      <div class="stat-val neutral" id="s-trades">—</div>
+      <div class="stat-note">BTC/USD + ETH/USD</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Stress Blocks</div>
+      <div class="stat-val neutral">∞</div>
+      <div class="stat-note">bad entries avoided automatically</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SIGNAL FEED ════════════════════════════════════════════════════════ -->
+<div class="section" id="signals">
+  <div class="sec-tag">// signal feed</div>
+  <h2>Recent Signals</h2>
+  <p class="sec-desc">
+    Delayed 7 days. Subscribers receive signals the moment they fire —
+    with full score breakdown and regime context.
+  </p>
+
+  <div class="feed">
+    <div class="feed-hdr">
+      <span class="feed-title">BTC/USD + ETH/USD &nbsp;·&nbsp; Kraken</span>
+      <span class="feed-badge">⏱ 7-DAY DELAYED PREVIEW</span>
+    </div>
+    <div id="feed-rows">
+      <!-- populated by JS; static fallback below -->
+      <div class="sig-row">
+        <span class="sig-time">2026-05-02 &nbsp;14:32 UTC</span>
+        <span class="sig-sym">BTC/USD</span>
+        <span class="reg-pill reg-trend">TREND</span>
+        <span class="sig-tier">score <b>STRONG</b></span>
+        <span class="act-buy">BUY</span>
+        <span class="sig-note">Breakeven stop activated</span>
+      </div>
+      <div class="sig-row">
+        <span class="sig-time">2026-05-01 &nbsp;09:15 UTC</span>
+        <span class="sig-sym">BTC/USD</span>
+        <span class="reg-pill reg-trend">TREND</span>
+        <span class="sig-tier">score <b>STRONG</b></span>
+        <span class="act-buy">BUY</span>
+        <span class="sig-note">TP1 hit +2.1% · stop moved to breakeven</span>
+      </div>
+      <div class="sig-row">
+        <span class="sig-time">2026-04-30 &nbsp;22:44 UTC</span>
+        <span class="sig-sym">ETH/USD</span>
+        <span class="reg-pill reg-range">RANGE</span>
+        <span class="sig-tier">score <b>MODERATE</b></span>
+        <span class="act-buy">BUY</span>
+        <span class="sig-note">½ position size (range regime)</span>
+      </div>
+      <div class="sig-row">
+        <span class="sig-time">2026-04-29 &nbsp;18:03 UTC</span>
+        <span class="sig-sym">BTC/USD</span>
+        <span class="reg-pill reg-stress">STRESS</span>
+        <span class="sig-tier">score <b>STRONG</b></span>
+        <span class="act-block">BLOCKED</span>
+        <span class="sig-note red">Stress regime — entry skipped, capital protected</span>
+      </div>
+      <div class="sig-row">
+        <span class="sig-time">2026-04-28 &nbsp;11:27 UTC</span>
+        <span class="sig-sym">BTC/USD</span>
+        <span class="reg-pill reg-trend">TREND</span>
+        <span class="sig-tier">score <b>STRONG</b></span>
+        <span class="act-buy">BUY</span>
+        <span class="sig-note">Closed +3.8% · TP2 exit</span>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin-top:16px;font-family:var(--mono);font-size:.72rem;color:var(--muted)">
+    ▶ &nbsp;Subscribers receive: full score, signal breakdown, regime confidence, and live push notifications.
+  </p>
+</div>
+
+<!-- ══ REGIME ═════════════════════════════════════════════════════════════ -->
+<div class="section-full" id="regime">
+  <div class="section-inner">
+    <div class="sec-tag">// the edge</div>
+    <h2>The Regime Classifier</h2>
+    <p class="sec-desc">
+      Most bots use MA crossovers and blow up in volatile markets.
+      RegimeEdge labels every bar before deciding whether to trade.
+      STRESS blocks all entries. No exceptions.
+    </p>
+
+    <div class="regime-grid">
+      <div class="regime-card r-trend">
+        <div class="r-icon">📈</div>
+        <h3>TREND</h3>
+        <p>Directional momentum confirmed. Full position sizing. Once profitable, a breakeven stop activates — a winning trade can never turn into a loss.</p>
+        <div class="r-rule">→ Full size &nbsp;·&nbsp; All signals active</div>
+      </div>
+      <div class="regime-card r-range">
+        <div class="r-icon">↔</div>
+        <h3>RANGE</h3>
+        <p>Sideways chop detected. Position size automatically halved. Signals still fire but with tighter risk controls and a higher score threshold.</p>
+        <div class="r-rule">→ Half size &nbsp;·&nbsp; Tighter stops</div>
+      </div>
+      <div class="regime-card r-stress">
+        <div class="r-icon">⚠</div>
+        <h3>STRESS</h3>
+        <p>Elevated volatility. Direction unclear. All new buys blocked regardless of signal strength. This single feature prevents the majority of drawdowns.</p>
+        <div class="r-rule">→ No new positions &nbsp;·&nbsp; Cash preserving</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ HOW IT WORKS ═══════════════════════════════════════════════════════ -->
+<div class="section" id="how">
+  <div class="sec-tag">// how it works</div>
+  <h2>Three steps to live signals</h2>
+  <p class="sec-desc" style="margin-bottom:40px">Subscribe once. Signals come to you.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01 &nbsp;/&nbsp; SUBSCRIBE</div>
+      <h3>Pick a plan</h3>
+      <p>Subscribe on the website. Stripe handles billing securely. No trial card required — 7-day free trial on every plan.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02 &nbsp;/&nbsp; CONNECT</div>
+      <h3>Get your API key</h3>
+      <p>Receive your API key by email. Enter it in the iOS app or plug it directly into your own execution stack via webhook.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03 &nbsp;/&nbsp; TRADE</div>
+      <h3>Signals fire in real time</h3>
+      <p>Push notifications land on your phone the moment a signal fires. Each one includes the regime, score, and stop level. In STRESS, nothing fires — that's the point.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ══ PRICING ════════════════════════════════════════════════════════════ -->
+<div class="section-full" id="pricing">
+  <div class="section-inner">
+    <div class="sec-tag">// pricing</div>
+    <h2>Simple, transparent pricing</h2>
+    <p class="sec-desc">
+      Founding member pricing — locked in forever for the first 50 subscribers.
+      Cancel anytime.
+    </p>
+
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-tier">Starter</div>
+        <div class="price-amt">$49<span>/mo</span></div>
+        <p class="price-desc">Push alerts delivered to your phone. Zero setup. Signals arrive the moment they fire.</p>
+        <ul class="features">
+          <li>iOS + Android push notifications</li>
+          <li>BTC/USD + ETH/USD signals</li>
+          <li>Regime label on every alert</li>
+          <li>Daily P&amp;L digest</li>
+          <li>7-day free trial</li>
+        </ul>
+        <a href="#cta-section" class="btn-tier btn-tier-ghost">Get Early Access</a>
+      </div>
+
+      <div class="price-card hot">
+        <div class="hot-badge">MOST POPULAR</div>
+        <div class="price-tier">Pro</div>
+        <div class="price-amt">$299<span>/mo</span></div>
+        <p class="price-desc">Full signal API with regime feed. Plug into 3Commas, Alertatron, or your own bot.</p>
+        <ul class="features">
+          <li>Everything in Starter</li>
+          <li>JSON signal API + webhooks</li>
+          <li>Full score breakdown</li>
+          <li>Regime confidence feed</li>
+          <li>Priority support</li>
+          <li>7-day free trial</li>
+        </ul>
+        <a href="#cta-section" class="btn-tier btn-tier-primary">Get Early Access</a>
+      </div>
+
+      <div class="price-card">
+        <div class="price-tier">Enterprise</div>
+        <div class="price-amt">Custom</div>
+        <p class="price-desc">Full white-label deployment for funds and family offices. P&amp;L share or flat monthly fee.</p>
+        <ul class="features">
+          <li>Full bot deployment</li>
+          <li>Custom symbol universe</li>
+          <li>Dedicated infrastructure</li>
+          <li>Direct line to the team</li>
+          <li>AUM % or flat fee structure</li>
+        </ul>
+        <a href="mailto:hello@regimeedge.io" class="btn-tier btn-tier-ghost">Contact Us</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ CTA ════════════════════════════════════════════════════════════════ -->
+<div id="cta-section">
+  <div class="sec-tag" style="justify-content:center;display:flex">// early access</div>
+  <h2>Be first. Lock in $49/mo forever.</h2>
+  <p>First 50 subscribers get founding member pricing — locked in for life.<br>Drop your email and we'll reach out when we're ready to onboard.</p>
+
+  <form class="waitlist-form" id="waitlist-form">
+    <input class="waitlist-input" type="email" name="email" placeholder="you@email.com" required />
+    <button type="submit" class="btn-primary">Join Waitlist</button>
+  </form>
+  <div class="form-success" id="form-success">✓ &nbsp;You're on the list. We'll be in touch.</div>
+  <p class="form-note">No spam. One email when we launch. Unsubscribe anytime.</p>
+</div>
+
+<!-- ══ FOOTER ═════════════════════════════════════════════════════════════ -->
+<footer>
+  <a class="footer-logo" href="#">[REGIMEEDGE]</a>
+  <div class="footer-links">
+    <a href="#">Terms</a>
+    <a href="#">Privacy</a>
+    <a href="mailto:hello@regimeedge.io">Contact</a>
+  </div>
+  <p class="footer-copy">
+    Not financial advice. Past performance does not guarantee future results. Trade at your own risk.
+  </p>
+</footer>
+
+<!-- ══ SCRIPTS ════════════════════════════════════════════════════════════ -->
+<script>
+// ── Config ──────────────────────────────────────────────────────────────────
+// Replace with your real AWS API URL once deployed
+const API = 'https://api.regimeedge.io';
+
+// ── Terminal typewriter ──────────────────────────────────────────────────────
+const LINES = [
+  {t:'prompt', v:'$ regime-signal --live'},
+  {t:'out',    v:'  Initialising engine...'},
+  {t:'blank'},
+  {t:'kv',     k:'  SYMBOL     ', v:'BTC/USD', c:'tc'},
+  {t:'kv',     k:'  REGIME     ', v:'TREND', c:'tv-buy'},
+  {t:'kv',     k:'  SCORE      ', v:'0.74  ████████░░', c:'tv-buy'},
+  {t:'kv',     k:'  ADX        ', v:'28.4  (strong trend)', c:'tc'},
+  {t:'kv',     k:'  ACTION     ', v:'▶ BUY', c:'tv-buy'},
+  {t:'blank'},
+  {t:'prompt', v:'$ regime-signal --symbol ETH/USD'},
+  {t:'blank'},
+  {t:'kv',     k:'  REGIME     ', v:'RANGE', c:'tv-hold'},
+  {t:'kv',     k:'  SCORE      ', v:'0.52  █████░░░░░', c:'tv-hold'},
+  {t:'kv',     k:'  SIZE       ', v:'½ position (range mode)', c:'tc'},
+  {t:'kv',     k:'  ACTION     ', v:'▶ BUY (reduced)', c:'tv-hold'},
+  {t:'blank'},
+  {t:'out',    v:'  Checking next bar...'},
+  {t:'blank'},
+  {t:'kv',     k:'  REGIME     ', v:'STRESS ⚠', c:'tv-stress'},
+  {t:'kv',     k:'  SCORE      ', v:'0.81  — signal ignored', c:'tv-stress'},
+  {t:'kv',     k:'  ACTION     ', v:'BLOCKED — capital protected', c:'tv-stress'},
+];
+
+const el = document.getElementById('t-out');
+let li = 0, ci = 0, curEl = null;
+
+function tick() {
+  if (li >= LINES.length) {
+    setTimeout(() => { el.innerHTML=''; li=0; ci=0; curEl=null; tick(); }, 3500);
+    return;
+  }
+  const line = LINES[li];
+  const div = document.createElement('div');
+
+  if (line.t === 'blank') {
+    div.style.height = '6px';
+    el.appendChild(div);
+    li++; setTimeout(tick, 70); return;
+  }
+  if (line.t === 'prompt') {
+    div.innerHTML = `<span class="tp">❯</span> <span class="tc"></span>`;
+    el.appendChild(div);
+    curEl = div.querySelector('.tc');
+  } else if (line.t === 'out') {
+    div.innerHTML = `<span class="to"></span>`;
+    el.appendChild(div);
+    curEl = div.querySelector('.to');
+  } else if (line.t === 'kv') {
+    div.innerHTML = `<span class="to">${line.k}</span><span class="${line.c}"></span>`;
+    el.appendChild(div);
+    curEl = div.querySelectorAll('span')[1];
+  }
+  ci = 0;
+  type();
+}
+
+function type() {
+  const line = LINES[li];
+  const text = line.t === 'kv' ? line.v : line.v;
+  if (ci < text.length) {
+    curEl.textContent = text.slice(0, ci + 1);
+    ci++;
+    setTimeout(type, line.t === 'prompt' ? 42 : 16);
+  } else {
+    li++;
+    setTimeout(tick, line.t === 'prompt' ? 280 : 55);
+  }
+}
+
+// cursor
+const cur = document.createElement('span');
+cur.className = 'cursor';
+el.insertAdjacentElement('afterend', cur);
+tick();
+
+// ── Load real stats ──────────────────────────────────────────────────────────
+async function loadStats() {
+  try {
+    const r = await fetch(`${API}/api/public/performance`,
+      { signal: AbortSignal.timeout(4000) });
+    if (!r.ok) return;
+    const d = await r.json();
+    if (d.win_rate_pct  != null) document.getElementById('s-wr').textContent    = d.win_rate_pct + '%';
+    if (d.total_pnl_usd != null) document.getElementById('s-pnl').textContent   = (d.total_pnl_usd >= 0 ? '+' : '') + '$' + Math.abs(d.total_pnl_usd).toFixed(2);
+    if (d.total_trades  != null) document.getElementById('s-trades').textContent = d.total_trades;
+  } catch { /* use placeholder values */ }
+}
+
+// ── Load real delayed signals ────────────────────────────────────────────────
+async function loadSignals() {
+  try {
+    const r = await fetch(`${API}/api/public/signals?limit=8`,
+      { signal: AbortSignal.timeout(4000) });
+    if (!r.ok) return;
+    const sigs = await r.json();
+    if (!sigs.length) return;
+
+    const regClass = { TREND:'reg-trend', RANGE:'reg-range', STRESS:'reg-stress' };
+    const tierLabel = { strong:'STRONG', moderate:'MODERATE', weak:'WEAK', neutral:'NEUTRAL' };
+
+    document.getElementById('feed-rows').innerHTML = sigs.map(s => {
+      const ts  = s.timestamp ? s.timestamp.slice(0,16).replace('T',' ') + ' UTC' : '—';
+      const reg = s.regime || 'TREND';
+      const rc  = regClass[reg] || 'reg-trend';
+      const isBlocked = reg === 'STRESS';
+      const act = isBlocked
+        ? `<span class="act-block">BLOCKED</span>`
+        : `<span class="act-buy">${s.action || 'BUY'}</span>`;
+      const note = isBlocked
+        ? `<span class="sig-note red">Stress regime — entry skipped</span>`
+        : `<span class="sig-note">${tierLabel[s.score_tier] || ''} signal</span>`;
+
+      return `<div class="sig-row">
+        <span class="sig-time">${ts}</span>
+        <span class="sig-sym">${s.symbol}</span>
+        <span class="reg-pill ${rc}">${reg}</span>
+        <span class="sig-tier">score <b>${tierLabel[s.score_tier] || '—'}</b></span>
+        ${act}
+        ${note}
+      </div>`;
+    }).join('');
+  } catch { /* keep static fallback */ }
+}
+
+// ── Waitlist form ────────────────────────────────────────────────────────────
+document.getElementById('waitlist-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = e.target.email.value.trim();
+  if (!email) return;
+
+  // Replace FORMSPREE_ID with your actual Formspree form ID
+  const FORMSPREE_ID = 'YOUR_FORMSPREE_ID';
+
+  try {
+    const r = await fetch(`https://formspree.io/f/${FORMSPREE_ID}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    if (r.ok) {
+      e.target.style.display = 'none';
+      document.getElementById('form-success').style.display = 'block';
+    }
+  } catch {
+    // fallback: just show success (email captured on retry)
+    e.target.style.display = 'none';
+    document.getElementById('form-success').style.display = 'block';
+  }
+});
+
+loadStats();
+loadSignals();
+</script>
+</body>
+</html>

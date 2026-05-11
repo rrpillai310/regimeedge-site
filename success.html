@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to RegimeEdge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060a12;--bg-card:#0b1120;--green:#00e87a;--green-dim:#00a857;
+  --green-glow:rgba(0,232,122,0.12);--green-border:rgba(0,232,122,0.18);
+  --text:#cdd9e5;--muted:#6a7587;--red:#f85149;--mono:'JetBrains Mono',monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  padding:24px;overflow-x:hidden}
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background-image:
+    linear-gradient(rgba(0,232,122,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,232,122,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);opacity:.09;pointer-events:none;z-index:-1}
+.orb1{width:600px;height:600px;background:var(--green);top:-200px;right:-150px}
+.orb2{width:400px;height:400px;background:#1a3fff;bottom:-100px;left:-150px}
+
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:58px;background:rgba(6,10,18,0.82);
+  backdrop-filter:blur(16px);border-bottom:1px solid var(--green-border);
+}
+.logo{
+  font-family:var(--mono);font-size:1rem;font-weight:700;
+  color:var(--green);letter-spacing:-.01em;text-decoration:none;
+  display:flex;align-items:center;gap:8px;
+}
+.logo-bracket{color:var(--green-dim);font-weight:300}
+
+.card{
+  background:var(--bg-card);border:1px solid var(--green-border);
+  border-radius:12px;padding:52px 48px;max-width:520px;width:100%;
+  box-shadow:0 0 80px rgba(0,232,122,.06),0 24px 80px rgba(0,0,0,.5);
+  text-align:center;
+}
+.success-icon{font-size:2.8rem;margin-bottom:20px}
+h1{font-size:1.7rem;font-weight:700;color:#e8f0f8;margin-bottom:10px;letter-spacing:-.025em}
+.sub{color:var(--muted);font-size:.9rem;line-height:1.7;margin-bottom:36px}
+
+.email-form{display:flex;flex-direction:column;gap:12px;margin-bottom:8px}
+.input{
+  padding:13px 16px;background:#06090f;color:var(--text);
+  border:1px solid #1e2a3a;border-radius:6px;
+  font-family:var(--mono);font-size:.86rem;outline:none;
+  transition:border-color .15s;text-align:left;
+}
+.input:focus{border-color:var(--green-border)}
+.input::placeholder{color:var(--muted)}
+.btn{
+  font-family:var(--mono);font-size:.86rem;font-weight:700;
+  padding:13px 24px;background:var(--green);color:#060a12;
+  border:none;border-radius:6px;cursor:pointer;transition:.15s;
+}
+.btn:hover{opacity:.9;box-shadow:0 0 24px rgba(0,232,122,.3)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+
+.key-box{
+  display:none;
+  background:#06090f;border:1px solid var(--green-border);
+  border-radius:8px;padding:24px;margin-top:24px;text-align:left;
+}
+.key-label{
+  font-family:var(--mono);font-size:.66rem;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px;
+}
+.key-val{
+  font-family:var(--mono);font-size:.88rem;color:var(--green);
+  word-break:break-all;line-height:1.5;margin-bottom:16px;
+}
+.tier-badge{
+  display:inline-block;padding:3px 12px;border-radius:3px;
+  font-family:var(--mono);font-size:.7rem;font-weight:700;letter-spacing:.08em;
+  background:rgba(0,232,122,.1);color:var(--green);
+  border:1px solid rgba(0,232,122,.2);margin-bottom:16px;
+}
+.copy-btn{
+  font-family:var(--mono);font-size:.78rem;
+  padding:8px 18px;background:transparent;color:var(--green);
+  border:1px solid var(--green-border);border-radius:4px;
+  cursor:pointer;transition:.15s;
+}
+.copy-btn:hover{background:var(--green-glow)}
+.copy-btn.copied{color:#e8f0f8;border-color:#1e2a3a}
+
+.error-msg{
+  display:none;color:var(--red);
+  font-family:var(--mono);font-size:.8rem;margin-top:12px;
+  padding:12px 16px;background:rgba(248,81,73,.06);
+  border:1px solid rgba(248,81,73,.2);border-radius:6px;text-align:left;
+}
+
+.next-steps{
+  margin-top:28px;text-align:left;
+  font-size:.83rem;color:var(--muted);line-height:1.7;
+}
+.next-steps strong{color:var(--text)}
+.next-steps ol{padding-left:18px;margin-top:8px}
+.next-steps li{margin-bottom:6px}
+
+.back-link{
+  display:block;margin-top:32px;
+  font-family:var(--mono);font-size:.78rem;
+  color:var(--muted);text-decoration:none;
+}
+.back-link:hover{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<nav>
+  <a class="logo" href="/">
+    <span class="logo-bracket">[</span>REGIME<span style="color:#e8f0f8">EDGE</span><span class="logo-bracket">]</span>
+  </a>
+</nav>
+
+<div class="card">
+  <div class="success-icon">✓</div>
+  <h1>Payment confirmed.</h1>
+  <p class="sub">
+    Enter the email you used at checkout to retrieve your API key.
+    It takes up to 60 seconds for your subscription to activate after payment.
+  </p>
+
+  <form class="email-form" id="key-form">
+    <input class="input" id="email-input" type="email" placeholder="you@email.com" required autocomplete="email" />
+    <button class="btn" type="submit" id="submit-btn">Get My API Key →</button>
+  </form>
+
+  <div class="error-msg" id="error-msg"></div>
+
+  <div class="key-box" id="key-box">
+    <div class="key-label">Your Plan</div>
+    <div class="tier-badge" id="tier-badge">STARTER</div>
+    <div class="key-label">Your API Key</div>
+    <div class="key-val" id="key-val">—</div>
+    <button class="copy-btn" id="copy-btn" onclick="copyKey()">Copy Key</button>
+
+    <div class="next-steps">
+      <strong>Next steps:</strong>
+      <ol>
+        <li>Save this key — it won't be shown again here</li>
+        <li>Open the <strong>RegimeEdge iOS app</strong> → Settings → paste your key</li>
+        <li>Or use it in API calls: <code style="font-family:var(--mono);font-size:.8rem;color:var(--green)">X-API-Key: &lt;your-key&gt;</code></li>
+      </ol>
+    </div>
+  </div>
+
+  <a class="back-link" href="/">← Back to regimeedge.io</a>
+</div>
+
+<script>
+const API = 'https://api.regimeedge.io';
+
+// Pre-fill email from URL param if present
+const params = new URLSearchParams(location.search);
+if (params.get('email')) {
+  document.getElementById('email-input').value = params.get('email');
+}
+
+document.getElementById('key-form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = document.getElementById('email-input').value.trim().toLowerCase();
+  const btn   = document.getElementById('submit-btn');
+  const err   = document.getElementById('error-msg');
+
+  btn.disabled = true;
+  btn.textContent = 'Looking up…';
+  err.style.display = 'none';
+
+  // Retry up to 4 times with 10s gap (subscription webhook may take a moment)
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const r = await fetch(`${API}/api/subscriber/key?email=${encodeURIComponent(email)}`);
+      if (r.ok) {
+        const d = await r.json();
+        document.getElementById('key-val').textContent = d.api_key;
+        document.getElementById('tier-badge').textContent = (d.tier || 'starter').toUpperCase();
+        document.getElementById('key-box').style.display = 'block';
+        document.getElementById('key-form').style.display = 'none';
+        err.style.display = 'none';
+        return;
+      }
+      if (r.status === 404 && attempt < 3) {
+        btn.textContent = `Activating… (${(attempt + 1) * 10}s)`;
+        await new Promise(res => setTimeout(res, 10000));
+        continue;
+      }
+      const body = await r.json().catch(() => ({}));
+      throw new Error(body.detail || `Server error ${r.status}`);
+    } catch (ex) {
+      if (attempt < 3 && ex.message.includes('fetch')) {
+        await new Promise(res => setTimeout(res, 5000));
+        continue;
+      }
+      err.textContent = ex.message.includes('No active subscription')
+        ? 'No active subscription found for that email. If you just paid, wait 60 seconds and try again. Contact hello@regimeedge.io if this persists.'
+        : `Error: ${ex.message}`;
+      err.style.display = 'block';
+      break;
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Get My API Key →';
+});
+
+function copyKey() {
+  const key = document.getElementById('key-val').textContent;
+  navigator.clipboard.writeText(key).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy Key'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+</script>
+</body>
+</html>

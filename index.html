@@ -409,9 +409,9 @@ footer{
       <div class="stat-note">short / exit signals</div>
     </div>
     <div class="stat">
-      <div class="stat-lbl">Setups Watched</div>
+      <div class="stat-lbl">Setups Skipped</div>
       <div class="stat-val neutral" id="s-blocks">—</div>
-      <div class="stat-note">waiting on confirmation, no chase</div>
+      <div class="stat-note">regime + confirmation discipline</div>
     </div>
   </div>
 </div>
@@ -717,7 +717,7 @@ async function loadStats() {
     if (d.signals_fired_count  != null) document.getElementById('s-trades').textContent = fmt(d.signals_fired_count);
     if (d.buy_signals_count    != null) document.getElementById('s-buys').textContent   = fmt(d.buy_signals_count);
     if (d.sell_signals_count   != null) document.getElementById('s-sells').textContent  = fmt(d.sell_signals_count);
-    if (d.setups_watched_count != null) document.getElementById('s-blocks').textContent = fmt(d.setups_watched_count);
+    if (d.setups_skipped_count != null) document.getElementById('s-blocks').textContent = fmt(d.setups_skipped_count);
   } catch { /* use placeholder values */ }
 }
 

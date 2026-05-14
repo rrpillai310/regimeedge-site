@@ -145,7 +145,7 @@ h1 em{color:var(--green);font-style:normal}
 }
 .stats-inner{
   max-width:1200px;margin:0 auto;
-  display:grid;grid-template-columns:repeat(4,1fr);
+  display:grid;grid-template-columns:repeat(5,1fr);
 }
 .stat{padding:30px 20px;border-right:1px solid #0e1628}
 .stat:last-child{border-right:none}
@@ -394,18 +394,23 @@ footer{
       <div class="stat-note">live trading, real money</div>
     </div>
     <div class="stat">
-      <div class="stat-lbl">Total P&amp;L</div>
-      <div class="stat-val" id="s-pnl">—</div>
-      <div class="stat-note">net of all fees</div>
-    </div>
-    <div class="stat">
       <div class="stat-lbl">Signals Fired</div>
       <div class="stat-val neutral" id="s-trades">—</div>
       <div class="stat-note">BTC/USD + ETH/USD</div>
     </div>
     <div class="stat">
+      <div class="stat-lbl">Buy Signals</div>
+      <div class="stat-val" id="s-buys">—</div>
+      <div class="stat-note">long entries triggered</div>
+    </div>
+    <div class="stat">
+      <div class="stat-lbl">Sell Signals</div>
+      <div class="stat-val" id="s-sells">—</div>
+      <div class="stat-note">short / exit signals</div>
+    </div>
+    <div class="stat">
       <div class="stat-lbl">Stress Blocks</div>
-      <div class="stat-val neutral">∞</div>
+      <div class="stat-val neutral" id="s-blocks">—</div>
       <div class="stat-note">bad entries avoided automatically</div>
     </div>
   </div>
@@ -707,9 +712,12 @@ async function loadStats() {
       { signal: AbortSignal.timeout(4000) });
     if (!r.ok) return;
     const d = await r.json();
-    if (d.win_rate_pct  != null) document.getElementById('s-wr').textContent    = d.win_rate_pct + '%';
-    if (d.total_pnl_usd != null) document.getElementById('s-pnl').textContent   = (d.total_pnl_usd >= 0 ? '+' : '') + '$' + Math.abs(d.total_pnl_usd).toFixed(2);
-    if (d.total_trades  != null) document.getElementById('s-trades').textContent = d.total_trades;
+    const fmt = (n) => n.toLocaleString('en-US');
+    if (d.win_rate_pct         != null) document.getElementById('s-wr').textContent     = d.win_rate_pct + '%';
+    if (d.signals_fired_count  != null) document.getElementById('s-trades').textContent = fmt(d.signals_fired_count);
+    if (d.buy_signals_count    != null) document.getElementById('s-buys').textContent   = fmt(d.buy_signals_count);
+    if (d.sell_signals_count   != null) document.getElementById('s-sells').textContent  = fmt(d.sell_signals_count);
+    if (d.stress_blocks_count  != null) document.getElementById('s-blocks').textContent = fmt(d.stress_blocks_count);
   } catch { /* use placeholder values */ }
 }
 

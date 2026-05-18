@@ -3,8 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RegimeEdge — Regime-Aware Crypto Signals</title>
-<meta name="description" content="Institutional-grade crypto trading signals powered by a proprietary regime classifier. We sit out bad markets automatically.">
+<title>RegimeEdge — Regime-aware crypto signals, built in public</title>
+<meta name="description" content="A crypto signal bot that labels every market regime — TREND, RANGE, or STRESS — and refuses to trade in STRESS. Live track record, public API, methodology documented openly.">
+<link rel="canonical" href="https://regimeedge.io" />
+<meta property="og:title" content="RegimeEdge — Regime-aware crypto signals, built in public" />
+<meta property="og:description" content="A signal bot that labels every bar TREND, RANGE, or STRESS. In STRESS, it doesn't trade. Live API, public track record, no bullshit." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://regimeedge.io" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="RegimeEdge — Regime-aware crypto signals, built in public" />
+<meta name="twitter:description" content="A signal bot that labels every bar TREND, RANGE, or STRESS. In STRESS, it doesn't trade. Live API, public track record, no bullshit." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -143,6 +151,26 @@ h1 em{color:var(--green);font-style:normal}
   border-bottom:1px solid var(--green-border);
   padding:0 48px;
 }
+.stats-badge{
+  max-width:1200px;margin:0 auto;
+  display:flex;align-items:center;gap:8px;
+  padding:14px 0 0;
+  font-family:var(--mono);font-size:.72rem;color:var(--muted);
+}
+.stats-badge .live-dot{
+  width:8px;height:8px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:livepulse 2s ease-in-out infinite;
+}
+@keyframes livepulse{50%{opacity:.4}}
+.stats-badge a{color:var(--green-dim);text-decoration:none;border-bottom:1px dotted var(--green-border)}
+.stats-badge a:hover{color:var(--green)}
+.stats-note{
+  max-width:1200px;margin:0 auto;
+  padding:18px 0 30px;
+  font-family:var(--sans);font-size:.82rem;color:var(--muted);
+  line-height:1.65;font-style:italic;max-width:780px;
+}
 .stats-inner{
   max-width:1200px;margin:0 auto;
   display:grid;grid-template-columns:repeat(5,1fr);
@@ -241,7 +269,7 @@ h2{font-size:2.1rem;font-weight:700;color:#e8f0f8;margin-bottom:16px;letter-spac
 .step p{font-size:.83rem;color:var(--muted);line-height:1.65}
 
 /* ── Pricing ── */
-.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:52px}
+.pricing-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:52px}
 .price-card{
   background:var(--bg-card);border:1px solid #0e1628;
   border-radius:8px;padding:36px 28px;position:relative;
@@ -352,7 +380,7 @@ footer{
     <a href="#signals">Signals</a>
     <a href="#regime">How It Works</a>
     <a href="#pricing">Pricing</a>
-    <a href="#pricing" class="btn-nav">Coming Soon →</a>
+    <a href="track-record.html" class="btn-nav">Live Track Record →</a>
   </div>
 </nav>
 
@@ -360,16 +388,17 @@ footer{
 <div id="hero">
   <div class="hero-inner">
     <div>
-      <div class="hero-tag">Regime-aware trading signals</div>
+      <div class="hero-tag">Built in public · Live API · No bullshit</div>
       <h1>Sit out bad markets.<br><em>Automatically.</em></h1>
       <p class="hero-sub">
-        Institutional-grade crypto signals built on a proprietary regime classifier.
-        TREND, RANGE, STRESS — the system knows the difference and blocks trades
-        when volatility makes entry reckless.
+        A regime-aware crypto signal system. Every bar is labeled TREND, RANGE,
+        or STRESS — in STRESS, the bot doesn't trade. The full track record,
+        every signal, and every avoided setup is live and public.
+        Verify everything before you trust anything.
       </p>
       <div class="hero-ctas">
-        <a href="#pricing" class="btn-primary">Coming Soon</a>
-        <a href="#signals" class="btn-ghost">See Live Signals ↓</a>
+        <a href="track-record.html" class="btn-primary">See Live Track Record →</a>
+        <a href="https://github.com/rrpillai310/cryptotrader/blob/main/FUNCTIONAL_SPEC.md" target="_blank" rel="noopener" class="btn-ghost">Read the Methodology ↗</a>
       </div>
     </div>
 
@@ -387,6 +416,11 @@ footer{
 
 <!-- ══ STATS ═════════════════════════════════════════════════════════════════ -->
 <div id="stats">
+  <div class="stats-badge">
+    <span class="live-dot"></span>
+    <span>LIVE — these numbers refresh from api.regimeedge.io/api/public/performance on every page load.</span>
+    <a href="https://api.regimeedge.io/api/public/performance" target="_blank" rel="noopener">view the raw JSON →</a>
+  </div>
   <div class="stats-inner">
     <div class="stat">
       <div class="stat-lbl">Win Rate</div>
@@ -414,6 +448,11 @@ footer{
       <div class="stat-note">regime + confirmation discipline</div>
     </div>
   </div>
+  <p class="stats-note">
+    We publish win rate, signal counts, and discipline counters — not dollar P&amp;L or trade count.
+    Both are functions of deployed capital, not signal quality. A 10× larger account would post a 10×
+    larger P&amp;L for the same strategy; the strategy didn't change. The metrics above describe the system.
+  </p>
 </div>
 
 <!-- ══ SIGNAL FEED ════════════════════════════════════════════════════════ -->
@@ -480,34 +519,73 @@ footer{
   </p>
 </div>
 
+<!-- ══ BUILD IN PUBLIC — SHIPPED ════════════════════════════════════════════ -->
+<div class="section" id="shipped">
+  <div class="sec-tag">// build in public</div>
+  <h2>We ship the infrastructure in public</h2>
+  <p class="sec-desc" style="margin-bottom:40px">
+    Most "AI trading bot" services are a Telegram channel and a cropped P&amp;L screenshot.
+    RegimeEdge is real engineering. Recent ships:
+  </p>
+
+  <div class="regime-grid">
+    <div class="regime-card r-trend">
+      <h3 style="font-size:1rem">DVOL contrarian downgrade</h3>
+      <p>Deribit's vol index (the crypto VIX) overrides STRESS to half-size when extreme. 5-year backtest justifies it: extreme DVOL predicts mean-reversion, not drawdown.</p>
+      <div class="r-rule">→ Live · this week</div>
+    </div>
+    <div class="regime-card r-range">
+      <h3 style="font-size:1rem">Two-stage GARCH → HMM emissions</h3>
+      <p>Vol clustering modeled inside the emission process (GARCH(1,1) conditional vol), not faked via state switches. Two-stage approximation of full MS-GARCH.</p>
+      <div class="r-rule">→ Live · this week</div>
+    </div>
+    <div class="regime-card r-trend">
+      <h3 style="font-size:1rem">Absolute-anchor HMM mapping</h3>
+      <p>State→regime mapping uses absolute vol bands, not rank within window. Fixes the structural over-fire of the rank-based mapping that plagued v1.</p>
+      <div class="r-rule">→ Live · this week</div>
+    </div>
+    <div class="regime-card r-range">
+      <h3 style="font-size:1rem">iOS push alerts via APNs</h3>
+      <p>Signal alerts now ping your iPhone directly. End-to-end TLS with a Let's Encrypt cert. App distributed via TestFlight.</p>
+      <div class="r-rule">→ Live · this week</div>
+    </div>
+  </div>
+
+  <p style="margin-top:28px;font-family:var(--mono);font-size:.78rem;color:var(--muted);text-align:center">
+    →&nbsp;
+    <a href="https://github.com/rrpillai310/cryptotrader/commits/main" target="_blank" rel="noopener" style="color:var(--green-dim);border-bottom:1px dotted var(--green-border);text-decoration:none">
+      Full changelog &amp; architecture docs on GitHub
+    </a>
+  </p>
+</div>
+
 <!-- ══ REGIME ═════════════════════════════════════════════════════════════ -->
 <div class="section-full" id="regime">
   <div class="section-inner">
     <div class="sec-tag">// the edge</div>
     <h2>The Regime Classifier</h2>
     <p class="sec-desc">
-      Most bots use MA crossovers and blow up in volatile markets.
-      RegimeEdge labels every bar before deciding whether to trade.
-      STRESS blocks all entries. No exceptions.
+      Most TA-based bots treat every market the same way and bleed out in chop or crashes.
+      RegimeEdge labels every bar TREND, RANGE, or STRESS — and the bot trades each one differently.
     </p>
 
     <div class="regime-grid">
       <div class="regime-card r-trend">
         <div class="r-icon">📈</div>
         <h3>TREND</h3>
-        <p>Directional momentum confirmed. Full position sizing. Once profitable, a breakeven stop activates — a winning trade can never turn into a loss.</p>
+        <p>Directional momentum (ADX ≥ 20, vol normal). Full position size. Once a trade is in profit, a breakeven stop activates — a winning trade never turns into a loss.</p>
         <div class="r-rule">→ Full size &nbsp;·&nbsp; All signals active</div>
       </div>
       <div class="regime-card r-range">
         <div class="r-icon">↔</div>
         <h3>RANGE</h3>
-        <p>Sideways chop detected. Position size automatically halved. Signals still fire but with tighter risk controls and a higher score threshold.</p>
+        <p>Sideways chop (ADX &lt; 20). Position size halved. Signals still fire but require a higher score threshold to clear.</p>
         <div class="r-rule">→ Half size &nbsp;·&nbsp; Tighter stops</div>
       </div>
       <div class="regime-card r-stress">
         <div class="r-icon">⚠</div>
         <h3>STRESS</h3>
-        <p>Elevated volatility. Direction unclear. All new buys blocked regardless of signal strength. This single feature prevents the majority of drawdowns.</p>
+        <p>Elevated realized vol — crashes, news shocks, capitulation. New entries blocked entirely (except when Deribit's DVOL extreme flag fires, which triggers a contrarian half-size). The bot literally refuses to play.</p>
         <div class="r-rule">→ No new positions &nbsp;·&nbsp; Cash preserving</div>
       </div>
     </div>
@@ -522,19 +600,19 @@ footer{
 
   <div class="steps">
     <div class="step">
-      <div class="step-num">01 &nbsp;/&nbsp; SUBSCRIBE</div>
-      <h3>Pick a plan</h3>
-      <p>Subscribe on the website. Stripe handles billing securely. No trial card required — 7-day free trial on every plan.</p>
+      <div class="step-num">01 &nbsp;/&nbsp; WATCH FREE</div>
+      <h3>Join the free preview channel</h3>
+      <p>Join <code>@RegimeEdgeFree</code> on Telegram. A sampled subset of BUY signals appears there, 5-minute delayed, with regime context. No card required. Watch for as long as you want.</p>
     </div>
     <div class="step">
-      <div class="step-num">02 &nbsp;/&nbsp; CONNECT</div>
-      <h3>Link Telegram</h3>
-      <p>After subscribing, connect your Telegram account in one tap. Pro subscribers also get a JSON API key for direct integration.</p>
+      <div class="step-num">02 &nbsp;/&nbsp; SUBSCRIBE</div>
+      <h3>Upgrade for real-time signals</h3>
+      <p>When you're ready, pick a plan. Stripe handles billing. Real-time delivery on Telegram + iOS push + JSON webhook (Pro). All signals, all symbols. Cancel anytime.</p>
     </div>
     <div class="step">
       <div class="step-num">03 &nbsp;/&nbsp; TRADE</div>
-      <h3>Signals fire in real time</h3>
-      <p>Alerts land the moment a signal fires — Telegram or API webhook. Each one includes the regime, score, and stop level. In STRESS, nothing fires — that's the point.</p>
+      <h3>You decide</h3>
+      <p>Signals land with the regime label, score, ADX, and stop level. <strong>You</strong> decide whether to trade — RegimeEdge is informational, not automated execution. Most subscribers trade on Kraken or Coinbase.</p>
     </div>
   </div>
 </div>
@@ -551,16 +629,29 @@ footer{
 
     <div class="pricing-grid">
       <div class="price-card">
+        <div class="price-tier">Free Preview</div>
+        <div class="price-amt">$0<span>/mo</span></div>
+        <p class="price-desc">A sampled subset of BUY signals on Telegram, delayed 5 minutes. No card. Evaluate the quality before you pay anything.</p>
+        <ul class="features">
+          <li>Sampled BUY signals (~30%)</li>
+          <li>5-minute delay</li>
+          <li>Regime label on every alert</li>
+          <li>No card required</li>
+        </ul>
+        <a href="https://t.me/RegimeEdgeFree" target="_blank" rel="noopener" class="btn-tier btn-tier-ghost">Join the free channel →</a>
+      </div>
+
+      <div class="price-card">
         <div class="price-tier">Starter</div>
         <div class="price-amt">$49<span>/mo</span></div>
-        <p class="price-desc">Signal alerts via Telegram the moment they fire. Zero setup required.</p>
+        <p class="price-desc">All signals, real-time, via Telegram. Zero setup required.</p>
         <ul class="features">
-          <li>Telegram alerts — instant signal delivery</li>
+          <li>Telegram alerts — instant delivery</li>
           <li>BTC/USD + ETH/USD signals</li>
           <li>Regime label on every alert</li>
           <li>iOS push notifications</li>
         </ul>
-        <button class="btn-tier btn-tier-ghost" disabled style="opacity:.45;cursor:not-allowed">Coming Soon</button>
+        <a href="#cta-section" class="btn-tier btn-tier-ghost">Join waitlist →</a>
       </div>
 
       <div class="price-card hot">
@@ -575,7 +666,7 @@ footer{
           <li>Regime confidence feed</li>
           <li>Priority support</li>
         </ul>
-        <button class="btn-tier btn-tier-primary" disabled style="opacity:.45;cursor:not-allowed">Coming Soon</button>
+        <a href="#cta-section" class="btn-tier btn-tier-primary">Join waitlist →</a>
       </div>
 
       <div class="price-card">
@@ -589,7 +680,7 @@ footer{
           <li>Direct line to the team</li>
           <li>AUM % or flat fee structure</li>
         </ul>
-        <a href="mailto:hello@regimeedge.io" class="btn-tier btn-tier-ghost">Contact Us</a>
+        <a href="mailto:hello@regimeedge.io" class="btn-tier btn-tier-ghost">Contact us →</a>
       </div>
     </div>
   </div>
@@ -597,9 +688,9 @@ footer{
 
 <!-- ══ CTA ════════════════════════════════════════════════════════════════ -->
 <div id="cta-section">
-  <div class="sec-tag" style="justify-content:center;display:flex">// early access</div>
-  <h2>Be first. Lock in $49/mo forever.</h2>
-  <p>First 50 subscribers get founding member pricing — locked in for life.<br>Drop your email and we'll reach out when we're ready to onboard.</p>
+  <div class="sec-tag" style="justify-content:center;display:flex">// watch us build</div>
+  <h2>Watch us build this in public.</h2>
+  <p>Drop your email and you'll hear from us once — when paid subscriptions open.<br>In the meantime, the free Telegram channel and the public API let you watch everything we ship in real time. No FOMO drip, no daily marketing emails.</p>
 
   <form class="waitlist-form" id="waitlist-form">
     <input class="waitlist-input" type="email" name="email" placeholder="you@email.com" required />
@@ -619,6 +710,9 @@ footer{
   </div>
   <p class="footer-copy">
     Not financial advice. Past performance does not guarantee future results. Trade at your own risk.
+  </p>
+  <p class="footer-copy" style="font-size:.72rem;color:var(--muted);max-width:920px;margin:14px auto 0;line-height:1.65;opacity:.85">
+    <strong>Risk disclosure.</strong> Trading cryptocurrencies involves significant risk and may result in total loss of capital. Past performance shown on this site is the live, audited record of one operator's account and is <em>not indicative of future results</em>. RegimeEdge provides informational signals only and does not place trades on subscribers' behalf. Nothing on this site constitutes investment advice, a recommendation, or a solicitation to buy or sell any cryptocurrency. RegimeEdge is not a registered investment adviser, broker-dealer, futures commission merchant, or commodity pool operator with the SEC, CFTC, FCA, or any other regulator. You are responsible for your own trading decisions. Consult a licensed financial advisor before trading.
   </p>
 </footer>
 

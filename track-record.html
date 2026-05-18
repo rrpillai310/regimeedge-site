@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track Record — RegimeEdge</title>
+<meta name="description" content="Live auditable trade history for RegimeEdge crypto signals. Every entry, every exit, every P&L.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060a12;--bg-card:#0b1120;--bg-card2:#0e1628;
+  --green:#00e87a;--green-dim:#00a857;--green-glow:rgba(0,232,122,0.12);
+  --green-border:rgba(0,232,122,0.18);--text:#cdd9e5;--muted:#6a7587;
+  --red:#f85149;--yellow:#e3b341;--blue:#58a6ff;
+  --mono:'JetBrains Mono',monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background-image:linear-gradient(rgba(0,232,122,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,232,122,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);opacity:.09;pointer-events:none;z-index:-1}
+.orb1{width:700px;height:700px;background:var(--green);top:-200px;right:-150px}
+.orb2{width:500px;height:500px;background:#1a3fff;bottom:-100px;left:-150px}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:rgba(6,10,18,.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-logo{font-family:var(--mono);font-weight:700;font-size:1rem;color:var(--green);letter-spacing:.05em;text-decoration:none}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+
+/* Page */
+.page{max-width:1100px;margin:0 auto;padding:120px 24px 80px}
+
+/* Hero */
+.page-tag{font-family:var(--mono);font-size:.7rem;color:var(--green);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px}
+h1{font-size:2.4rem;font-weight:700;line-height:1.2;margin-bottom:12px}
+.page-desc{color:var(--muted);font-size:.95rem;max-width:560px;margin-bottom:48px}
+.disclaimer{font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-bottom:48px;padding:12px 16px;border:1px solid rgba(255,255,255,.06);border-radius:8px;background:var(--bg-card)}
+
+/* Stats */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:48px}
+.stat-card{background:var(--bg-card);border:1px solid var(--green-border);border-radius:12px;padding:20px 24px}
+.stat-val{font-family:var(--mono);font-size:1.7rem;font-weight:700;color:var(--green);line-height:1}
+.stat-val.red{color:var(--red)}
+.stat-lbl{font-size:.75rem;color:var(--muted);margin-top:6px}
+
+/* Chart */
+.chart-wrap{background:var(--bg-card);border:1px solid var(--green-border);border-radius:12px;padding:24px;margin-bottom:48px}
+.chart-title{font-family:var(--mono);font-size:.75rem;color:var(--muted);margin-bottom:16px;letter-spacing:.1em}
+canvas{width:100%;height:160px;display:block}
+
+/* Table */
+.table-wrap{background:var(--bg-card);border:1px solid var(--green-border);border-radius:12px;overflow:hidden;margin-bottom:48px}
+.table-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+.table-title{font-family:var(--mono);font-size:.75rem;color:var(--muted);letter-spacing:.1em}
+.table-note{font-family:var(--mono);font-size:.65rem;color:var(--muted)}
+table{width:100%;border-collapse:collapse}
+thead th{font-family:var(--mono);font-size:.65rem;color:var(--muted);text-align:left;padding:10px 24px;border-bottom:1px solid rgba(255,255,255,.06);letter-spacing:.08em}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.04);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,.025)}
+td{font-family:var(--mono);font-size:.78rem;padding:12px 24px;color:var(--text)}
+td.sym{color:var(--green);font-weight:600}
+td.win{color:var(--green)}
+td.loss{color:var(--red)}
+td.muted{color:var(--muted)}
+.outcome-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.06em}
+.outcome-win{background:rgba(0,232,122,.12);color:var(--green)}
+.outcome-loss{background:rgba(248,81,73,.12);color:var(--red)}
+
+/* Loading */
+.loading{font-family:var(--mono);font-size:.8rem;color:var(--muted);padding:40px 24px;text-align:center}
+
+/* CTA */
+.cta-bar{background:var(--bg-card);border:1px solid var(--green-border);border-radius:12px;padding:32px;text-align:center}
+.cta-bar h3{font-size:1.3rem;font-weight:700;margin-bottom:8px}
+.cta-bar p{color:var(--muted);font-size:.9rem;margin-bottom:24px}
+.btn-primary{display:inline-block;padding:12px 28px;background:var(--green);color:#060a12;font-family:var(--mono);font-weight:700;font-size:.85rem;text-decoration:none;border-radius:8px}
+
+/* Footer */
+footer{text-align:center;padding:40px 24px;border-top:1px solid rgba(255,255,255,.06);font-size:.8rem;color:var(--muted)}
+footer a{color:var(--muted);text-decoration:none;margin:0 12px}
+footer a:hover{color:var(--text)}
+
+@media(max-width:700px){
+  nav{padding:14px 20px}
+  .page{padding:100px 16px 60px}
+  h1{font-size:1.6rem}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  thead th:nth-child(3),thead th:nth-child(4),td:nth-child(3),td:nth-child(4){display:none}
+}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<nav>
+  <a class="nav-logo" href="/">[REGIMEEDGE]</a>
+  <div class="nav-links">
+    <a href="/#signals">Signals</a>
+    <a href="/#pricing">Pricing</a>
+    <a href="track-record.html" style="color:var(--green)">Track Record</a>
+    <a href="mailto:hello@regimeedge.io">Contact</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-tag">// live track record</div>
+  <h1>Every trade. Every return.</h1>
+  <p class="page-desc">
+    Auditable trade history from the live bot running on Kraken.
+    No cherry-picking. No backtests. Real money, real signals.
+  </p>
+  <p class="disclaimer">
+    ⚠ &nbsp;Not financial advice. Past performance does not guarantee future results.
+    Trade at your own risk.
+  </p>
+
+  <!-- Stats — capital-independent only -->
+  <div class="stats-grid" id="stats-grid">
+    <div class="stat-card"><div class="stat-val" id="s-wr">—</div><div class="stat-lbl">Win Rate</div></div>
+    <div class="stat-card"><div class="stat-val" id="s-avgwin">—</div><div class="stat-lbl">Avg Win</div></div>
+    <div class="stat-card"><div class="stat-val" id="s-avgloss">—</div><div class="stat-lbl">Avg Loss</div></div>
+    <div class="stat-card"><div class="stat-val" id="s-days">—</div><div class="stat-lbl">Days Running</div></div>
+  </div>
+
+  <p class="disclaimer" style="opacity:.7;font-style:italic;margin-top:18px">
+    Win rate, avg win %, avg loss % — these describe the trading system.
+    We don't publish dollar P&amp;L or trade count because both scale with deployed capital,
+    not signal quality. A 10× larger account would post a 10× larger P&amp;L for the same strategy.
+    The metrics above are the ones that describe the system itself.
+  </p>
+
+  <!-- Per-trade return bar chart -->
+  <div class="chart-wrap">
+    <div class="chart-title">PER-TRADE RETURN (%)</div>
+    <canvas id="pnl-chart"></canvas>
+  </div>
+
+  <!-- Trade table -->
+  <div class="table-wrap">
+    <div class="table-hdr">
+      <span class="table-title">CLOSED TRADES</span>
+      <span class="table-note">Live bot · Kraken · BTC/USD + ETH/USD</span>
+    </div>
+    <div id="table-body">
+      <div class="loading">Loading trade history…</div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-bar">
+    <h3>Want signals the moment they fire?</h3>
+    <p>Subscribers receive BUY and EXIT signals in real time — with full score breakdown, regime context, and push notifications.</p>
+    <a href="mailto:hello@regimeedge.io" class="btn-primary">Contact Us →</a>
+  </div>
+</div>
+
+<footer>
+  <a href="/">regimeedge.io</a>
+  <a href="mailto:hello@regimeedge.io">Contact</a>
+  <br><br>
+  Not financial advice. Past performance does not guarantee future results.
+  <p style="font-size:.72rem;color:#6a7587;max-width:920px;margin:14px auto 0;line-height:1.65;opacity:.85;font-style:normal;text-align:left">
+    <strong>Risk disclosure.</strong> Trading cryptocurrencies involves significant risk and may result in total loss of capital. Past performance shown on this site is the live, audited record of one operator's account and is <em>not indicative of future results</em>. RegimeEdge provides informational signals only and does not place trades on subscribers' behalf. Nothing on this site constitutes investment advice, a recommendation, or a solicitation to buy or sell any cryptocurrency. RegimeEdge is not a registered investment adviser, broker-dealer, futures commission merchant, or commodity pool operator with the SEC, CFTC, FCA, or any other regulator. You are responsible for your own trading decisions. Consult a licensed financial advisor before trading.
+  </p>
+</footer>
+
+<script>
+const API = 'https://api.regimeedge.io';
+
+function fmt(ts) {
+  if (!ts) return '—';
+  return ts.slice(0, 16).replace('T', ' ') + ' UTC';
+}
+function fmtPrice(v) {
+  if (v == null) return '—';
+  return '$' + Number(v).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtPct(v) {
+  if (v == null) return '—';
+  const sign = v >= 0 ? '+' : '';
+  return sign + v.toFixed(2) + '%';
+}
+
+async function load() {
+  try {
+    const r = await fetch(`${API}/api/public/track-record?limit=100`, { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) throw new Error('API error');
+    const data = await r.json();
+    renderStats(data.stats, data.trades);
+    renderChart(data.trades);
+    renderTable(data.trades);
+  } catch (e) {
+    document.getElementById('table-body').innerHTML =
+      '<div class="loading" style="color:var(--red)">Could not load trade data — try again shortly.</div>';
+  }
+}
+
+function renderStats(s, trades) {
+  if (!s) return;
+  document.getElementById('s-wr').textContent   = (s.win_rate_pct != null ? s.win_rate_pct + '%' : '—');
+  document.getElementById('s-days').textContent = (s.days_running != null ? s.days_running + 'd' : '—');
+
+  // Derive avg-win-% and avg-loss-% client-side from per-trade pnl_pct.
+  // These are capital-independent — same metric whether the operator runs $1k or $1M.
+  if (trades && trades.length) {
+    const wins   = trades.filter(t => t.outcome === 'win'  && t.pnl_pct != null).map(t => t.pnl_pct);
+    const losses = trades.filter(t => t.outcome === 'loss' && t.pnl_pct != null).map(t => t.pnl_pct);
+    const avg    = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+    const aw = avg(wins), al = avg(losses);
+    document.getElementById('s-avgwin').textContent  = aw != null ? '+' + aw.toFixed(2) + '%' : '—';
+    document.getElementById('s-avgloss').textContent = al != null ? al.toFixed(2) + '%' : '—';
+    document.getElementById('s-avgloss').className   = 'stat-val red';
+  }
+}
+
+function renderChart(trades) {
+  if (!trades || !trades.length) return;
+  const canvas = document.getElementById('pnl-chart');
+  const ctx    = canvas.getContext('2d');
+  const dpr    = window.devicePixelRatio || 1;
+  canvas.width  = canvas.offsetWidth  * dpr;
+  canvas.height = canvas.offsetHeight * dpr;
+  ctx.scale(dpr, dpr);
+  const W = canvas.offsetWidth, H = canvas.offsetHeight;
+
+  // Per-trade % return as a bar chart (oldest → newest, left → right).
+  // We deliberately do NOT cumulate. Summing per-trade percent returns is
+  // arithmetically nonsensical, and showing a "cumulative %" curve would
+  // imply compounding that isn't actually happening. Each bar = one trade.
+  const pcts = [...trades].reverse().map(t => t.pnl_pct || 0);
+
+  const maxAbs = Math.max(0.5, ...pcts.map(Math.abs));
+  const pad = 22;
+  const innerW = W - pad * 2, innerH = H - pad * 2;
+  const barW = Math.max(1, innerW / pcts.length - 1);
+  const midY = pad + innerH / 2;
+  const yScale = innerH / 2 / maxAbs;
+
+  // Zero line
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(pad, midY);
+  ctx.lineTo(W - pad, midY);
+  ctx.stroke();
+
+  // Bars
+  for (let i = 0; i < pcts.length; i++) {
+    const v   = pcts[i];
+    const h   = Math.abs(v) * yScale;
+    const x   = pad + i * (barW + 1);
+    const top = v >= 0 ? midY - h : midY;
+    ctx.fillStyle = v >= 0 ? 'rgba(0,232,122,0.78)' : 'rgba(248,81,73,0.78)';
+    ctx.fillRect(x, top, barW, h);
+  }
+
+  // Y-axis hints (top/bottom labels)
+  ctx.fillStyle = 'rgba(205,217,229,0.4)';
+  ctx.font = '10px "JetBrains Mono", monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('+' + maxAbs.toFixed(1) + '%', 4, pad + 10);
+  ctx.fillText('-' + maxAbs.toFixed(1) + '%', 4, H - 4);
+}
+
+function renderTable(trades) {
+  if (!trades || !trades.length) {
+    document.getElementById('table-body').innerHTML =
+      '<div class="loading">No closed trades yet.</div>';
+    return;
+  }
+  const rows = trades.map(t => {
+    const win = t.outcome === 'win';
+    return `<tr>
+      <td class="muted">${fmt(t.close_time)}</td>
+      <td class="sym">${t.symbol}</td>
+      <td>${fmtPrice(t.entry_price)}</td>
+      <td>${fmtPrice(t.exit_price)}</td>
+      <td class="${win ? 'win' : 'loss'}">${fmtPct(t.pnl_pct)}</td>
+      <td><span class="outcome-pill ${win ? 'outcome-win' : 'outcome-loss'}">${win ? 'WIN' : 'LOSS'}</span></td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('table-body').innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>CLOSED</th>
+          <th>SYMBOL</th>
+          <th>ENTRY</th>
+          <th>EXIT</th>
+          <th>RETURN</th>
+          <th>OUTCOME</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+load();
+</script>
+</body>
+</html>

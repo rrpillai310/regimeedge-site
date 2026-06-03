@@ -74,6 +74,9 @@ td.muted{color:var(--muted)}
 .outcome-pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;letter-spacing:.06em}
 .outcome-win{background:rgba(0,232,122,.12);color:var(--green)}
 .outcome-loss{background:rgba(248,81,73,.12);color:var(--red)}
+.sig-pill{display:inline-block;padding:2px 9px;border-radius:20px;font-family:var(--mono);font-size:.6rem;font-weight:700;letter-spacing:.04em}
+.sig-cap{background:rgba(227,179,65,.14);color:var(--yellow)}
+.sig-trend{background:rgba(255,255,255,.05);color:var(--muted)}
 
 /* Loading */
 .loading{font-family:var(--mono);font-size:.8rem;color:var(--muted);padding:40px 24px;text-align:center}
@@ -94,7 +97,7 @@ footer a:hover{color:var(--text)}
   .page{padding:100px 16px 60px}
   h1{font-size:1.6rem}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
-  thead th:nth-child(3),thead th:nth-child(4),td:nth-child(3),td:nth-child(4){display:none}
+  thead th:nth-child(4),thead th:nth-child(5),td:nth-child(4),td:nth-child(5){display:none}
 }
 </style>
 </head>
@@ -281,9 +284,14 @@ function renderTable(trades) {
   }
   const rows = trades.map(t => {
     const win = t.outcome === 'win';
+    const cap = t.signal === 'Capitulation';
+    const sigPill = t.signal
+      ? `<span class="sig-pill ${cap ? 'sig-cap' : 'sig-trend'}">${t.signal}</span>`
+      : '';
     return `<tr>
       <td class="muted">${fmt(t.close_time)}</td>
       <td class="sym">${t.symbol}</td>
+      <td>${sigPill}</td>
       <td>${fmtPrice(t.entry_price)}</td>
       <td>${fmtPrice(t.exit_price)}</td>
       <td class="${win ? 'win' : 'loss'}">${fmtPct(t.pnl_pct)}</td>
@@ -297,6 +305,7 @@ function renderTable(trades) {
         <tr>
           <th>CLOSED</th>
           <th>SYMBOL</th>
+          <th>SIGNAL</th>
           <th>ENTRY</th>
           <th>EXIT</th>
           <th>RETURN</th>

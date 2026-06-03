@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Log — RegimeEdge</title>
+<meta name="description" content="Built in plain sight. Every strategy change RegimeEdge ships — the idea, the backtest, and the honest caveats. Including what we don't yet know.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#060a12;--bg-card:#0b1120;--bg-card2:#0e1628;
+  --green:#00e87a;--green-dim:#00a857;--green-glow:rgba(0,232,122,0.12);
+  --green-border:rgba(0,232,122,0.18);--text:#cdd9e5;--muted:#6a7587;
+  --red:#f85149;--yellow:#e3b341;--blue:#58a6ff;
+  --mono:'JetBrains Mono',monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden}
+body::before{
+  content:'';position:fixed;inset:0;z-index:-1;
+  background-image:linear-gradient(rgba(0,232,122,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,232,122,0.03) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.orb{position:fixed;border-radius:50%;filter:blur(130px);opacity:.09;pointer-events:none;z-index:-1}
+.orb1{width:700px;height:700px;background:var(--green);top:-200px;right:-150px}
+.orb2{width:500px;height:500px;background:#1a3fff;bottom:-100px;left:-150px}
+
+/* Nav */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:rgba(6,10,18,.85);backdrop-filter:blur(12px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav-logo{font-family:var(--mono);font-weight:700;font-size:1rem;color:var(--green);letter-spacing:.05em;text-decoration:none}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-size:.85rem;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+
+/* Page */
+.page{max-width:920px;margin:0 auto;padding:120px 24px 80px}
+.page-tag{font-family:var(--mono);font-size:.7rem;color:var(--green);letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px}
+h1{font-size:2.4rem;font-weight:700;line-height:1.2;margin-bottom:12px}
+.page-desc{color:var(--muted);font-size:.95rem;max-width:620px;margin-bottom:32px}
+.disclaimer{font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-bottom:56px;padding:12px 16px;border:1px solid rgba(255,255,255,.06);border-radius:8px;background:var(--bg-card)}
+.disclaimer strong{color:var(--yellow)}
+
+/* Entry */
+.entry{background:var(--bg-card);border:1px solid var(--green-border);border-radius:12px;padding:30px 32px;margin-bottom:32px}
+.entry-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.entry-date{font-family:var(--mono);font-size:.7rem;color:var(--muted);letter-spacing:.06em}
+.pill{display:inline-block;padding:3px 10px;border-radius:20px;font-family:var(--mono);font-size:.62rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.pill-live{background:rgba(0,232,122,.12);color:var(--green)}
+.pill-research{background:rgba(88,166,255,.12);color:var(--blue)}
+.pill-armed{background:rgba(227,179,65,.14);color:var(--yellow)}
+.entry h2{font-size:1.45rem;font-weight:700;margin-bottom:6px;line-height:1.25}
+.entry .sub{color:var(--muted);font-size:.9rem;margin-bottom:22px}
+.entry h3{font-family:var(--mono);font-size:.7rem;color:var(--green-dim);letter-spacing:.12em;text-transform:uppercase;margin:24px 0 10px}
+.entry p{font-size:.92rem;color:var(--text);margin-bottom:12px}
+.entry p .m{color:var(--muted)}
+.entry strong{color:var(--text)}
+.entry .em{color:var(--green)}
+
+/* Backtest stat strip */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:18px 0 8px}
+.stat-card{background:#06090f;border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:16px 18px}
+.stat-val{font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--green);line-height:1}
+.stat-val.red{color:var(--red)}
+.stat-val.amber{color:var(--yellow)}
+.stat-lbl{font-size:.68rem;color:var(--muted);margin-top:8px;line-height:1.35}
+.stat-foot{font-family:var(--mono);font-size:.64rem;color:var(--muted);margin-top:10px}
+
+/* Caveat list */
+.caveats{list-style:none;margin:8px 0 4px}
+.caveats li{position:relative;padding-left:20px;font-size:.88rem;color:var(--text);margin-bottom:9px;line-height:1.5}
+.caveats li::before{content:'▸';position:absolute;left:0;color:var(--yellow)}
+.caveats li .m{color:var(--muted)}
+
+/* CTA + footer */
+.cta-bar{background:var(--bg-card);border:1px solid var(--green-border);border-radius:12px;padding:32px;text-align:center;margin-top:8px}
+.cta-bar h3{font-size:1.25rem;font-weight:700;margin-bottom:8px;color:var(--text);font-family:var(--sans);letter-spacing:0;text-transform:none}
+.cta-bar p{color:var(--muted);font-size:.9rem;margin-bottom:22px}
+.btn-primary{display:inline-block;padding:12px 28px;background:var(--green);color:#060a12;font-family:var(--mono);font-weight:700;font-size:.85rem;text-decoration:none;border-radius:8px}
+footer{text-align:center;padding:40px 24px;border-top:1px solid rgba(255,255,255,.06);font-size:.8rem;color:var(--muted)}
+footer a{color:var(--muted);text-decoration:none;margin:0 12px}
+footer a:hover{color:var(--text)}
+
+@media(max-width:700px){
+  nav{padding:14px 20px}
+  .nav-links{gap:16px}
+  .page{padding:100px 16px 60px}
+  h1{font-size:1.6rem}
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .entry{padding:24px 20px}
+}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<nav>
+  <a class="nav-logo" href="/">[REGIMEEDGE]</a>
+  <div class="nav-links">
+    <a href="/#signals">Signals</a>
+    <a href="/#pricing">Pricing</a>
+    <a href="track-record.html">Track Record</a>
+    <a href="build-log.html" style="color:var(--green)">Build Log</a>
+    <a href="mailto:hello@regimeedge.io">Contact</a>
+  </div>
+</nav>
+
+<div class="page">
+  <div class="page-tag">Build Log · Research</div>
+  <h1>Built in plain sight.</h1>
+  <p class="page-desc">Every strategy change we ship — the idea, the backtest, and the honest caveats, including what we don't yet know. The operator trades these signals with real money, so the homework is public too.</p>
+  <div class="disclaimer"><strong>Note.</strong> Backtests below are historical simulations, not live results. They are how we decide what to ship — not a promise of what it will do. New strategies are flagged as such and run small until they prove out live.</div>
+
+  <!-- ENTRY: Capitulation buy -->
+  <div class="entry">
+    <div class="entry-meta">
+      <span class="entry-date">2026-06-03</span>
+      <span class="pill pill-live">Shipped · Live</span>
+      <span class="pill pill-armed">Armed · not yet fired</span>
+    </div>
+    <h2>Capitulation buy — buy blood, not a falling knife</h2>
+    <div class="sub">A contrarian book for the crashes our trend filter is built to sit out.</div>
+
+    <h3>The problem</h3>
+    <p>RegimeEdge sizes down — to zero — in high-volatility STRESS, and our trend filter blocks longs in downtrends. That's the discipline that protects capital. But it also means that when a market is selling off hard, the bot does <span class="m">nothing</span> — it sits in cash and waits. Good for not losing money; it leaves the <em>recovery</em> on the table.</p>
+
+    <h3>The idea</h3>
+    <p>Add one narrow, contrarian entry that only wakes up in a crash: <strong>buy when there's blood in the streets — but don't catch a falling knife.</strong> Three things must line up:</p>
+    <p><span class="em">Blood</span> &nbsp;— price at least <strong>15% below</strong> its 200-day average (deep capitulation, not a normal dip).<br>
+    <span class="em">Fear</span> &nbsp;— the Fear &amp; Greed index in its <strong>Extreme-Fear</strong> band.<br>
+    <span class="em">Not a knife</span> &nbsp;— price has already <strong>bounced ≥3% off the low</strong> (it has stopped falling before we step in).</p>
+
+    <h3>What the backtest said</h3>
+    <p class="m">BTC + ETH, daily, 2019–2026. The guard is the whole point:</p>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-val red">−90%</div><div class="stat-lbl">Buying deep dips <strong>raw</strong> (no guard)</div></div>
+      <div class="stat-card"><div class="stat-val">+58%</div><div class="stat-lbl">+ bounce guard (wait for the turn)</div></div>
+      <div class="stat-card"><div class="stat-val">+152%</div><div class="stat-lbl">+ extreme-fear confirm</div></div>
+      <div class="stat-card"><div class="stat-val amber">52%</div><div class="stat-lbl">win rate, full version</div></div>
+    </div>
+    <p class="stat-foot">Catching the knife loses (−90%). Waiting for the bounce flips it positive (+58%). Adding the fear filter compounds it (+152%). The edge isn't "buy the dip" — it's "buy the dip <em>after</em> it stops dropping."</p>
+
+    <h3>What we deliberately checked — and changed</h3>
+    <p>We re-ran it on the 1-hour timeframe the bot trades on. The bounce guard <strong>held</strong> (win rate 40% → 73%), but the fear filter <strong>did not transfer</strong> to a short-horizon average. So the signal evaluates blood against the <strong>daily</strong> 200-day average, where the evidence is strongest — not the intraday one. We changed the design because the data told us to.</p>
+
+    <h3>Honest caveats</h3>
+    <ul class="caveats">
+      <li><strong>Live-unproven.</strong> <span class="m">Backtested over 7 years and shipped 2026-06-03, but it has not fired live yet. We treat it as unproven until it does.</span></li>
+      <li><strong>It bleeds before it works.</strong> <span class="m">In testing, entries routinely drew ~10% against us before resolving — so it runs small, with a wide stop. Capitulations are violent.</span></li>
+      <li><strong>Dormant right now.</strong> <span class="m">Bitcoin isn't 15% below its 200-day line today, so the signal is armed but silent. It's built for the next real dump, not this tape.</span></li>
+      <li><strong>One bull-heavy sample.</strong> <span class="m">2019–2026 includes a long bull. It survived the 2022 bear in testing, but a single history is a single history.</span></li>
+    </ul>
+
+    <h3>Status</h3>
+    <p>Enabled live on BTC/ETH, 2026-06-03. Reversible with a single config flag. When it first fires, the entry, exit, and P&amp;L land on the <a href="track-record.html" style="color:var(--green)">Track Record</a> like every other trade — win or lose.</p>
+  </div>
+
+  <div class="cta-bar">
+    <h3>This is what "built in public" means.</h3>
+    <p>We publish the wins, the losses, and the homework — including the backtests that talked us out of things. Watch the receipts.</p>
+    <a href="track-record.html" class="btn-primary">See the live track record →</a>
+  </div>
+</div>
+
+<footer>
+  <a href="/">regimeedge.io</a>
+  <a href="track-record.html">Track Record</a>
+  <a href="mailto:hello@regimeedge.io">Contact</a>
+  <br><br>
+  Not financial advice. Past performance does not guarantee future results.
+  <p style="font-size:.72rem;color:#6a7587;max-width:920px;margin:14px auto 0;line-height:1.65;opacity:.85;font-style:normal;text-align:left">
+    <strong>Risk disclosure.</strong> Trading cryptocurrencies involves significant risk and may result in total loss of capital. Backtests shown on this page are historical simulations and are <em>not</em> indicative of future results; live performance shown elsewhere on this site is the audited record of one operator's account. RegimeEdge provides informational signals only and does not place trades on subscribers' behalf. Nothing on this site constitutes investment advice, a recommendation, or a solicitation to buy or sell any cryptocurrency. RegimeEdge is not a registered investment adviser, broker-dealer, futures commission merchant, or commodity pool operator with the SEC, CFTC, FCA, or any other regulator. You are responsible for your own trading decisions. Consult a licensed financial advisor before trading.
+  </p>
+</footer>
+</body>
+</html>
